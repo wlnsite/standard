@@ -14,11 +14,6 @@ core
 /*/*/node_modules
 /*/*/package-lock.json
 /*/dist
-/*/wwwroot
-/*/webroot
-/*/xcore
-/*/output
-/*/xcore/platform
 /Control/src/views/charts
 /Control/src/views/payset
 /Control/src/views/record
