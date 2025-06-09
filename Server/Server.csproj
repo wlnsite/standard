@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<AssemblyName>app</AssemblyName>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>disable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<InvariantGlobalization>true</InvariantGlobalization>
+		<SatelliteResourceLanguages>true</SatelliteResourceLanguages>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>CS8602;CS8618;CS8632</NoWarn>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<DebugType>none</DebugType>
+		<DebugSymbols>false</DebugSymbols>
+	</PropertyGroup>
+	<ItemGroup>
+	  <Compile Remove="Controllers\authxController.cs" />
+	  <Compile Remove="Controllers\Control\UtilityController.cs" />
+	  <Compile Remove="Controllers\Service\ServiceController.cs" />
+	  <Compile Remove="Models\Trade.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="SqlSugarCore" Version="5.1.4.160" />
+		<PackageReference Include="SqlSugarCore.MySqlConnector" Version="5.1.4.92" />
+		<PackageReference Include="Wlniao.OpenApi" Version="1.0.10" />
+		<PackageReference Include="Wlniao.XCenter" Version="8.0.64" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="Dockerfile">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="Wlniao.XCore.xml">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Controllers\Service\" />
+	</ItemGroup>
+</Project>
