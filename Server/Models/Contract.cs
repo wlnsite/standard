@@ -1,10 +1,13 @@
-﻿using SqlSugar;
+﻿using Dto;
+using SqlSugar;
 namespace Models
 {
     /// <summary>
     /// 服务合约
     /// </summary>
     [SugarTable(SqlContext.Perfix + "contract")]
+    [SugarIndex("index_buyer", nameof(buyer), OrderByType.Asc)]
+    [SugarIndex("index_supplier", nameof(supplier), OrderByType.Asc)]
     public class Contract
     {
         /// <summary>

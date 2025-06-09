@@ -76,6 +76,9 @@ namespace Controllers.Control
         [HttpPost]
         [WlniaoBodyParameter(Type = typeof(Dto.User))]
         [ProducesResponseType<ApiResult<string>>(0)]
+        [WlniaoQueryParameter(Name = "sid", Description = "用户标识", Required = true)]
+        [WlniaoQueryParameter(Name = "role", Description = "授权角色 manger/operator", Required = true)]
+        [WlniaoQueryParameter(Name = "owner", Description = "所属机构", Required = true)]
         public IActionResult submit()
         {
             return CheckSession((xsession, ctx) =>

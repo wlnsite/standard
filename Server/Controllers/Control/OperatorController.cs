@@ -13,65 +13,6 @@ namespace Controllers.Control
     public class OperatorController : BaseController
     {
         /// <summary>
-        /// 操作员列表
-        /// </summary>
-        /// <returns></returns>
-        [HttpPost]
-        [ProducesResponseType<ApiResult<List<Dto.Option>>>(0)]
-        [WlniaoQueryParameter(Name = "owner", Description = "操作员所属机构", Required = false)]
-        public IActionResult list()
-        {
-            return CheckSession((xsession, ctx) =>
-            {
-                var obj = InputDeserialize();
-                var result = new ApiResult<List<Dto.Option>>
-                {
-                    code = "-1",
-                    tips = true,
-                    data = new List<Dto.Option>()
-                };
-                try
-                {
-                    var owner = obj.GetInt32("owner");
-                    if (owner <= 0)
-                    {
-                        result.message = "未指定操作员所属机构，请指定";
-                    }
-                    else
-                    {
-                        var db = new SqlContext();
-                        var exp = Expressionable.Create<Models.Operator>().And(o => o.owner == owner && o.state >= 0);
-                        var query = db.Queryable<Models.Operator>().Where(exp.ToExpression());
-                        var rows = query.OrderBy(o => o.time_create).ToList();
-                        var userSids = rows.Select(o => o.sid).ToArray();
-                        var userRows = db.Queryable<Models.User>().Where(o => userSids.Contains(o.sid)).ToList();
-                        foreach (var row in rows)
-                        {
-                            var user = userRows.Where(o => o.sid == row.sid).FirstOrDefault();
-                            if (user == null)
-                            {
-                                continue;
-                            }
-                            result.data.Add(new Dto.Option
-                            {
-                                value = user.sid,
-                                label = user.name
-                            });
-                        }
-                        result.code = "0";
-                        result.success = true;
-                        result.message = "查询完成，数据已返回";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    result.message = ex.Message;
-                }
-                return OutputSerialize(result);
-            });
-        }
-
-        /// <summary>
         /// 分页列表
         /// </summary>
         /// <returns></returns>
@@ -139,7 +80,8 @@ namespace Controllers.Control
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        [WlniaoBodyParameter(Type = typeof(Dto.Operator))]
+        [WlniaoQueryParameter(Name = "owner", Description = "所属机构", Required = true)]
+        [WlniaoQueryParameter(Name = "mobile", Description = "用户手机号", Required = true)]
         [ProducesResponseType<ApiResult<string>>(0)]
         public IActionResult submit()
         {
@@ -147,15 +89,20 @@ namespace Controllers.Control
             {
                 var db = new SqlContext();
                 var obj = InputDeserialize();
-                var sid = obj.GetString("sid");
                 var owner = obj.GetInt32("owner");
-                var row = owner <= 0 || string.IsNullOrEmpty(sid) ? null : db.Queryable<Models.Operator>().Where(o => o.sid == sid && o.owner == owner).First();
-                if (row == null && owner > 0 && !string.IsNullOrEmpty(sid))
+                var mobile = obj.GetString("mobile");
+                var user = !strUtil.IsMobile(mobile) ? null : db.Queryable<Models.User>().Where(o => o.mobile == mobile).First();
+                var row = owner <= 0 || user == null ? null : db.Queryable<Models.Operator>().Where(o => o.sid == user.sid && o.owner == owner).First();
+                if (row == null && owner > 0 && user != null)
                 {
-                    row = new Models.Operator { sid = sid, owner = owner, time_create = DateTools.GetUnix() };
+                    row = new Models.Operator { sid = user.sid, owner = owner, time_create = DateTools.GetUnix() };
                 }
                 var result = new ApiResult<string> { code = "-1", tips = true };
-                if (row == null)
+                if (user == null)
+                {
+                    return OutputMessage(result, "用户手机号无效，请重新输入", "201");
+                }
+                else if (row == null)
                 {
                     result.code = "404";
                     result.message = "所选记录无效，请重新选择";
@@ -185,7 +132,8 @@ namespace Controllers.Control
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        [WlniaoQueryParameter(Name = "key", Description = "标识ID", Required = true)]
+        [WlniaoQueryParameter(Name = "sid", Description = "用户标识ID", Required = true)]
+        [WlniaoQueryParameter(Name = "owner", Description = "所属机构", Required = true)]
         [ProducesResponseType<ApiResult<string>>(0)]
         public IActionResult remove()
         {
@@ -227,7 +175,8 @@ namespace Controllers.Control
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        [WlniaoQueryParameter(Name = "key", Description = "标识ID", Required = true)]
+        [WlniaoQueryParameter(Name = "sid", Description = "用户标识ID", Required = true)]
+        [WlniaoQueryParameter(Name = "owner", Description = "所属机构", Required = true)]
         [ProducesResponseType<ApiResult<Dto.Operator>>(0)]
         public IActionResult modify()
         {

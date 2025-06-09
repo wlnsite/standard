@@ -1,5 +1,6 @@
 ﻿using SqlSugar;
 using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 using Wlniao;
 
 namespace Models
@@ -8,6 +9,7 @@ namespace Models
     /// 机构证书密钥
     /// </summary>
     [SugarTable(SqlContext.Perfix + "cert_key")]
+    [SugarIndex("index_owner", nameof(owner), OrderByType.Asc)]
     public class CertKey
     {
         /// <summary>
