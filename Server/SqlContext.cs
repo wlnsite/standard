@@ -75,8 +75,8 @@ public class SqlContext : SqlSugarClient
                     if (!db.Queryable<Models.User>().Any())
                     {
                         var rows = new List<Models.User>();
-                        rows.Add(new Models.User { sid = "240623000100001", name = "斜阳草树", mobile = "13038937751", time_create = now });
-                        rows.Add(new Models.User { sid = "172510577500001", name = "田荣明", mobile = "13983240200", time_create = now });
+                        rows.Add(new Models.User { sid = "5d0c95bc-2441-7e23-c9fa-7d561205697", name = "斜阳草树", mobile = "13038937751", time_create = now });
+                        rows.Add(new Models.User { sid = "6847e06b-4381-9c92-d482-7d599694008", name = "田荣明", mobile = "13983240200", time_create = now });
                         db.Storageable<Models.User>(rows).ExecuteCommand();
                     }
                 }

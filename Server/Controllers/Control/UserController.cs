@@ -142,8 +142,23 @@ namespace Controllers.Control
                 var row = string.IsNullOrEmpty(sid) ? null : db.Queryable<Models.User>().Where(o => o.sid == sid).First();
                 if (row == null && string.IsNullOrEmpty(sid))
                 {
-                    //sid=
-                    row = new Models.User { sid = sid, time_create = DateTools.GetUnix() };
+                    var api = Authify.Sid.GetSidByMobile(mobile);
+                    if (api.success)
+                    {
+                        row = new Models.User { sid = api.data, time_create = DateTools.GetUnix() };
+                    }
+                    else
+                    {
+                        return OutputMessage(result, "用户账号注册失败，请稍后再试", api.code);
+                    }
+                }
+                else
+                {
+                    var api = Authify.Sid.GetMobileBySid(sid);
+                    if (api.success && api.data != mobile)
+                    {
+                        mobile = api.data;
+                    }
                 }
                 if (row == null)
                 {
