@@ -62,7 +62,7 @@
                     <el-select v-model="select.user" allow-create filterable remote placeholder="请输入登录用手机号码" v-on:change="selectUser" :remote-method="searchUser" style="width: 210px">
                         <el-option v-for="item in options.users" :key="item.value" :label="item.value" :value="item">
                             <span style="float:left">{{item.value}}</span>
-                            <span style=" float: right; color: var(--el-text-color-secondary); font-size: 13px;">{{item.label}}</span>
+                            <span class="f13 cr1" style="float: right;">{{item.label}}</span>
                         </el-option>
                     </el-select>
                     <el-input v-model="form.name" placeholder="姓名" style="width: 160px"></el-input><span class="tips notnull"></span>

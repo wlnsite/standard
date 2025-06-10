@@ -107,7 +107,7 @@
                 } else {
                     wln.toast(res.message)
                 }
-            }, { sid: row.sid })
+            }, { sid:row.sid , owner:row.owner , mobile:row.mobile})
         } else {
             form.drawer = true
         }
