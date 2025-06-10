@@ -6,22 +6,23 @@
     </div>
     <div class="wln-line"></div>
     <el-table :data="pager.rows" :empty-text="pager.message" style="width:100%">
-        <el-table-column width="168" label="商户号" fixed="left">
+        <el-table-column width="168" label="手机号" fixed="left">
             <template #default="scope">
-                <div class="fs15 lh18">{{scope.row.id}}</div>
+                <div class="fs15 lh18">{{scope.row.mobile}}</div>
             </template>
         </el-table-column>
-        <el-table-column width="320" label="商户名称" fixed="left">
+        <el-table-column width="168" label="姓名" fixed="left">
             <template #default="scope">
                 <div class="fs15 lh18">{{scope.row.name}}</div>
             </template>
         </el-table-column>
-        <el-table-column width="320" label="平台公钥" fixed="left">
-            <template #default="scope">
-                <div class="fs15 lh18"><span style="color:#67C23A" v-if="scope.row.server_pub == '已录入'">已录入</span><span v-else>已录入</span></div>
-            </template>
-        </el-table-column>
         <el-table-column></el-table-column>
+        <el-table-column width="128" label="注册时间">
+            <template #default="scope">{{scope.row.time_create.showTime('yyyy-MM-dd')}}</template>
+        </el-table-column>
+        <el-table-column width="198" label="最近登录时间">
+            <template #default="scope">{{scope.row.time_login_last.showTime()}}</template>
+        </el-table-column>
         <el-table-column width="108" align="center" fixed="right">
             <template #default="scope">
                 <el-dropdown placement="bottom-end">
@@ -29,7 +30,6 @@
                     <template #dropdown>
                         <el-dropdown-menu>
                             <el-dropdown-item v-on:click="modify(scope.row)" icon="edit">查看/编辑</el-dropdown-item>
-                            <el-dropdown-item v-on:click="remove(scope.row)" icon="delete">删除</el-dropdown-item>
                         </el-dropdown-menu>
                     </template>
                 </el-dropdown>
@@ -42,10 +42,10 @@
         <div class="wln-mask-form" style="width:580px;">
             <div class="wln-title">用户信息</div>
             <el-form label-width="120px">
-                <el-form-item label="手机账号">
+                <el-form-item label="手机号码">
                     <el-input v-model="form.mobile" style="width:360px" placeholder=""></el-input><span class="tips notnull"></span>
                 </el-form-item>
-                <el-form-item label="用户姓名">
+                <el-form-item label="姓名">
                     <el-input v-model="form.name" style="width: 360px" placeholder=""></el-input><span class="tips notnull"></span>
                 </el-form-item>
                 <el-form-item class="el-form-btns">
@@ -62,6 +62,7 @@
         sid: '',
         name: '',
         mobile: '',
+        time_create:'',
         drawer: false
     }
     import { ref, reactive, onMounted, getCurrentInstance } from 'vue'
@@ -75,49 +76,43 @@
         pager.message = pager.loadMsg
         getlist(0)
     }
+
     function getlist(page) {
         form.drawer = false
         query.page = parseInt(page) || 0
         pager.message = pager.loadMsg
-        wln.api('/merchant/pager', (res) => {
+        wln.api('/user/pager', (res) => {
             pager.rows = res.data.rows || []
             pager.total = res.data.total || 0
             pager.message = res.success ? res.data.message : res.message
         }, query, true, true, (res) => { pager.message = pager.errMsg })
     }
+
     function submit() {
-        wln.api('/merchant/submit', (res) => {
+        wln.api('/user/submit', (res) => {
             wln.toast(res.message, res.success ? 'success' : 'error')
             if (res.success) {
                 getlist()
             }
         }, form)
     }
-    function remove(row) {
-        wln.confirm('数据一经删除将无法恢复，是否继续？', () => {
-            wln.api('/merchant/remove', (res) => {
-                wln.toast(res.message, res.success)
-                if (res.success) {
-                    getlist()
-                }
-            }, { id: row.id })
-        })
-    }
+    
     function modify(row) {
         for (let i in mForm) { form[i] = mForm[i] }
         if (row) {
-            wln.api('/merchant/modify', (res) => {
+            wln.api('/user/modify', (res) => {
                 if (res.success) {
                     for (let i in mForm) { form[i] = res.data[i] }
                     form.drawer = true
                 } else {
                     wln.toast(res.message)
                 }
-            }, { id: row.id })
+            }, { sid: row.sid })
         } else {
             form.drawer = true
         }
     }
+
     onMounted(() => {
         refresh()
     })

@@ -17,7 +17,7 @@
         <el-table-column width="320" label="终端名称/标识" fixed="left">
             <template #default="scope">
                 <div class="fs15 lh18">{{scope.row.name}}</div>
-                <div class="fs12 lh14 c99">ID:{{scope.row.id}}</div>
+                <div class="fs12 lh14 c99">ID:{{scope.row.sid}}</div>
             </template>
         </el-table-column>
         <el-table-column width="320" label="终端通讯密钥" fixed="left">
@@ -48,7 +48,7 @@
             <div class="wln-title">收款终端信息</div>
             <el-form label-width="120px">
                 <el-form-item label="终端标识">
-                    <el-input v-model="form.id" style="width: 256px" placeholder="15位收款终端标识ID" :disabled="form.create_time > 0"></el-input>
+                    <el-input v-model="form.sid" style="width: 256px" placeholder="15位收款终端标识ID" :disabled="form.create_time > 0"></el-input>
                     <el-select v-model="form.state" placeholder="状态" style="width:100px">
                         <el-option label="启用" :value="1"></el-option>
                         <el-option label="停用" :value="0"></el-option>
@@ -74,7 +74,8 @@
 
 <script setup>
     let mForm = {
-        id: '',
+        sn: '',
+        sid: '',
         name: '',
         state: 1,
         public_key: '',
@@ -97,14 +98,14 @@
         form.drawer = false
         query.page = parseInt(page) || 0
         pager.message = pager.loadMsg
-        wln.api('/terminal/pager', (res) => {
+        wln.api('/certkey/pager', (res) => {
             pager.rows = res.data.rows || []
             pager.total = res.data.total || 0
             pager.message = res.success ? res.data.message : res.message
         }, query, true, true, (res) => { pager.message = pager.errMsg })
     }
     function submit() {
-        wln.api('/terminal/submit', (res) => {
+        wln.api('/certkey/submit', (res) => {
             wln.toast(res.message, res.success ? 'success' : 'error')
             if (res.success) {
                 getlist()
@@ -113,25 +114,25 @@
     }
     function remove(row) {
         wln.confirm('数据一经删除将无法恢复，是否继续？', () => {
-            wln.api('/terminal/remove', (res) => {
+            wln.api('/certkey/remove', (res) => {
                 wln.toast(res.message, res.success)
                 if (res.success) {
                     getlist()
                 }
-            }, { id: row.id })
+            }, { sn: row.sn })
         })
     }
     function modify(row) {
         for (let i in mForm) { form[i] = mForm[i] }
         if (row) {
-            wln.api('/terminal/modify', (res) => {
+            wln.api('/certkey/modify', (res) => {
                 if (res.success) {
                     for (let i in mForm) { form[i] = res.data[i] }
                     form.drawer = true
                 } else {
                     wln.toast(res.message)
                 }
-            }, { id: row.id })
+            }, { sn: row.sn ,sid: row.sid })
         } else {
             form.drawer = true
         }

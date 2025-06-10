@@ -58,7 +58,7 @@ namespace Controllers.Control
                         });
                     }
                     result.data.total = query.Count();
-                    result.code = "0";
+                    result.code = "200";
                     result.message = "查询完成，数据已返回";
                 }
                 catch (Exception ex)
@@ -209,6 +209,27 @@ namespace Controllers.Control
                 }
                 return OutputSerialize(result);
             });
+        }
+    
+        /// <summary>
+        /// 随机生成一个新的密钥对
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        [ProducesResponseType<ApiResult<Dto.CertKey>>(0)]
+        public IActionResult random()
+        {
+            var key = new Wlniao.Crypto.KeyTool();
+            var result = new ApiResult<Dto.CertKey> { code = "0", tips = true };
+            result.code = "200";
+            result.data = new Dto.CertKey
+            {
+                public_key = Wlniao.Crypto.Helper.Encode(key.PublicKey),
+                private_key = Wlniao.Crypto.Helper.Encode(key.PrivateKey)
+            };
+            result.success = true;
+            result.message = "生成成功，密钥已返回";
+            return OutputSerialize(result);
         }
     
     

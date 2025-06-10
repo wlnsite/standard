@@ -18,11 +18,10 @@ export default defineConfig({
             resolvers: [ElementPlusResolver()],
         }),
     ],
-    base: process.env.NODE_ENV === 'development' ? '': '/',
+    base: process.env.NODE_ENV === 'development' ? '': '/control',
     //base: process.env.NODE_ENV === 'development' ? '': '/vapp',
     build: {
-        outDir: "../Server/wwwroot", 
-        // outDir: "../Server/wwwroot/vapp", 
+        outDir: "../Server/wwwroot/control", 
         emptyOutDir: true 
     },
     define: { 'process.env': {} },
@@ -44,7 +43,7 @@ export default defineConfig({
         port: 7800,
         cors: false,
         proxy: {
-            "/control/service": { target: "http://127.0.0.1:8008", changeOrigin: true, ws: false }
+            "/control/service": { target: "http://192.168.31.230:9800", changeOrigin: true, ws: false }
         }
     },
 })

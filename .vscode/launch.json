@@ -15,7 +15,7 @@
             "stopAtEntry": false,
             "env": {
                 "WLN_DEVTEST2": "true",
-                "WLN_LISTEN_PORT": "7800",
+                "WLN_LISTEN_PORT": "7880",
                 "ASPNETCORE_ENVIRONMENT": "Development"
             },
             "sourceFileMap": {

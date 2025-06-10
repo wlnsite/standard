@@ -21,6 +21,7 @@ namespace Controllers.Control
         [WlniaoQueryParameter(Name = "size", Description = "每页返回数量长度，默认：10", Required = false)]
         [WlniaoQueryParameter(Name = "page", Description = "当前页码：默认为1", Required = false)]
         [WlniaoQueryParameter(Name = "key", Description = "查询筛选关键字", Required = false)]
+        [WlniaoQueryParameter(Name = "owner", Description = "所属机构", Required = true)]
         public IActionResult list()
         {
             return CheckSession((xsession, ctx) =>

@@ -97,16 +97,17 @@ router.isReady().then(() => {
         children: [
             { path: 'user', component: () => import('@/views/user/list.vue') },
             { path: 'owner', component: () => import('@/views/owner/list.vue') },
-            { path: 'owner_certkey', component: () => import('@/views/owner/certkey.vue') }
+            { path: 'owner_certkey', component: () => import('@/views/owner/certkey.vue') },
+            { path: 'owner_operator', component: () => import('@/views/owner/operator.vue') }
         ]
     })
-    router.addRoute({
-        path: `${base}/contract`,
-        children: [
-            { path: 'merchant', component: () => import('@/views/payset/merchant.vue') },
-            { path: 'terminal', component: () => import('@/views/payset/terminal.vue') },
-            { path: 'operator', component: () => import('@/views/payset/operator.vue') }
-        ]
-    })
+    // router.addRoute({
+    //     path: `${base}/contract`,
+    //     children: [
+    //         { path: 'merchant', component: () => import('@/views/payset/merchant.vue') },
+    //         { path: 'terminal', component: () => import('@/views/payset/terminal.vue') },
+    //         { path: 'operator', component: () => import('@/views/payset/operator.vue') }
+    //     ]
+    // })
     router.replace(router.currentRoute.value.fullPath)
 })

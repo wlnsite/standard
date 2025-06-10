@@ -78,6 +78,7 @@
 
 <script setup>
     let mForm = {
+        owner: '',
         id: '',
         role: '',
         name: '',

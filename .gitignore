@@ -17,5 +17,6 @@ core
 /Control/src/views/charts
 /Control/src/views/payset
 /Control/src/views/record
+/Server/wwwroot/control
 /Server/Controllers/Service/ServiceController.cs
 /Server/Models/Trade.cs

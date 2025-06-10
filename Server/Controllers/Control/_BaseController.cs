@@ -25,14 +25,24 @@ namespace Controllers.Control
         }
 
         /// <summary>
-        /// 管理端静态发布页【仅匹配非control/service/以外的目录】
+        /// 管理端静态发布页【仅匹配非control/service/及control/assets/以外的目录】
         /// </summary>
         /// <returns></returns>
         [ApiExplorerSettings(IgnoreApi = true)]
-        [Route("control/{p1:regex(^(?!service))}/{p2?}/{p3?}/{p4?}")]
+        [Route("control/{p1:regex(^(?!(service|assets)))}/{p2?}/{p3?}/{p4?}")]
         public IActionResult appx(string? p1, string? p2, string? p3, string? p4)
         {
-            return Content("empty page", "text/html", System.Text.Encoding.UTF8);
+            var file = Wlniao.IO.PathTool.Map("wwwroot", "control", "index.html");
+            if (Wlniao.IO.FileEx.Exists(file))
+            {
+                var html = Wlniao.IO.FileEx.ReadUTF8String(file);
+                // html = html.Replace("\"/assets/", "\"/manage/assets/");
+                return Content(html, "text/html", System.Text.Encoding.UTF8);
+            }
+            else
+            {
+                return ErrorMsg("Sorry, 应用程序页面未发布!!!");
+            }
         }
 
         /// <summary>
