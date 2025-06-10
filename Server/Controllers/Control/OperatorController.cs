@@ -91,37 +91,66 @@ namespace Controllers.Control
                 var obj = InputDeserialize();
                 var owner = obj.GetInt32("owner");
                 var mobile = obj.GetString("mobile");
-                var user = !strUtil.IsMobile(mobile) ? null : db.Queryable<Models.User>().Where(o => o.mobile == mobile).First();
-                var row = owner <= 0 || user == null ? null : db.Queryable<Models.Operator>().Where(o => o.sid == user.sid && o.owner == owner).First();
-                if (row == null && owner > 0 && user != null)
-                {
-                    row = new Models.Operator { sid = user.sid, owner = owner, time_create = DateTools.GetUnix() };
-                }
+                var name = obj.GetString("name");
+                var role = obj.GetString("role");
                 var result = new ApiResult<string> { code = "-1", tips = true };
+                if (owner <= 0)
+                {
+                    return OutputMessage(result, "所属机构未输入，请输入", "101");
+                }
+                if (string.IsNullOrEmpty(role))
+                {
+                    return OutputMessage(result, "授权角色未选择，请选择", "101");
+                }
+                if (!strUtil.IsMobile(mobile))
+                {
+                    return OutputMessage(result, "手机号码无效，请重新输入", "101");
+                }
+                if (string.IsNullOrEmpty(name))
+                {
+                    return OutputMessage(result, "操作员姓名未输入，请输入", "101");
+                }
+                var user = db.Queryable<Models.User>().Where(o => o.mobile == mobile).OrderByDescending(o => o.time_create).First();
                 if (user == null)
                 {
-                    return OutputMessage(result, "用户手机号无效，请重新输入", "201");
+                    try
+                    {
+                        var api = Authify.Sid.GetSidByMobile(mobile);
+                        if (api.success)
+                        {
+                            user = new Models.User { sid = api.data, time_create = DateTools.GetUnix() };
+                            if (db.Storageable<Models.User>(user).ExecuteCommand() <= 0)
+                            {
+                                throw new Exception();
+                            }
+                        }
+                        else
+                        {
+                            throw new Exception();
+                        }
+                    } catch {
+                        return OutputMessage(result, "用户账号添加失败，请稍后再试", "502");
+                    }
                 }
-                else if (row == null)
+
+                var row = user == null ? null : db.Queryable<Models.Operator>().Where(o => o.sid == user.sid && o.owner == owner).First();
+                if (row == null)
                 {
-                    result.code = "404";
-                    result.message = "所选记录无效，请重新选择";
+                    row = new Models.Operator { sid = user.sid, owner = owner, authority = "", time_create = DateTools.GetUnix() };
+                }
+                row.role = role;
+                row.state = obj.GetInt32("state");
+                if (db.Storageable<Models.Operator>(row).ExecuteCommand() > 0)
+                {
+                    result.code = "200";
+                    result.data = row.sid;
+                    result.success = true;
+                    result.message = "提交成功，操作已保存";
                 }
                 else
                 {
-                    row.state = obj.GetInt32("state");
-                    if (db.Storageable<Models.Operator>(row).ExecuteCommand() > 0)
-                    {
-                        result.code = "200";
-                        result.data = row.sid;
-                        result.success = true;
-                        result.message = "提交成功，操作已保存";
-                    }
-                    else
-                    {
-                        result.code = "500";
-                        result.message = "提交失败，数据未保存";
-                    }
+                    result.code = "500";
+                    result.message = "提交失败，数据未保存";
                 }
                 return OutputSerialize(result);
             });

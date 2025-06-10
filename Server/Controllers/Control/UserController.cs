@@ -17,18 +17,18 @@ namespace Controllers.Control
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        [ProducesResponseType<ApiResult<List<Dto.Option>>>(0)]
+        [ProducesResponseType<ApiResult<List<Dto.User>>>(200)]
         [WlniaoQueryParameter(Name = "key", Description = "查询筛选关键字", Required = false)]
         public IActionResult list()
         {
             return CheckSession((xsession, ctx) =>
             {
                 var obj = InputDeserialize();
-                var result = new ApiResult<List<Dto.Option>>
+                var result = new ApiResult<List<Dto.User>>
                 {
                     code = "-1",
                     tips = true,
-                    data = new List<Dto.Option>()
+                    data = new List<Dto.User>()
                 };
                 try
                 {
@@ -37,19 +37,20 @@ namespace Controllers.Control
                     var key = obj.GetString("key");
                     if (key.IsNotNullAndEmpty())
                     {
-                        exp = exp.And(o => o.mobile.Contains(key));
+                        exp = exp.And(o => o.mobile.Contains(key) || o.name.Contains(key));
                     }
                     var query = db.Queryable<Models.User>().Where(exp.ToExpression());
                     var rows = query.OrderBy(o => o.time_create).ToList();
                     foreach (var row in rows)
                     {
-                        result.data.Add(new Dto.Option
+                        result.data.Add(new Dto.User
                         {
-                            value = row.sid,
-                            label = row.name
+                            sid = row.sid,
+                            name = row.name,
+                            mobile = row.mobile
                         });
                     }
-                    result.code = "0";
+                    result.code = "200";
                     result.success = true;
                     result.message = "查询完成，数据已返回";
                 }
@@ -60,6 +61,7 @@ namespace Controllers.Control
                 return OutputSerialize(result);
             });
         }
+
 
         /// <summary>
         /// 分页列表
@@ -149,7 +151,7 @@ namespace Controllers.Control
                     }
                     else
                     {
-                        return OutputMessage(result, "用户账号注册失败，请稍后再试", api.code);
+                        return OutputMessage(result, "用户账号添加失败，请稍后再试", api.code);
                     }
                 }
                 else

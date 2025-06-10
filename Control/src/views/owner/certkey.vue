@@ -27,6 +27,9 @@
             </template>
         </el-table-column>
         <el-table-column></el-table-column>
+        <el-table-column width="128" label="录入时间">
+            <template #default="scope">{{scope.row.time_create.showTime('yyyy-MM-dd')}}</template>
+        </el-table-column>
         <el-table-column width="108" align="center" fixed="right">
             <template #default="scope">
                 <el-dropdown placement="bottom-end">
@@ -47,21 +50,18 @@
         <div class="wln-mask-form" style="width:580px;">
             <div class="wln-title">收款终端信息</div>
             <el-form label-width="120px">
-                <el-form-item label="终端标识">
-                    <el-input v-model="form.sid" style="width: 256px" placeholder="15位收款终端标识ID" :disabled="form.create_time > 0"></el-input>
+                <el-form-item label="密钥编码">
+                    <el-input  v-model="input" style="width: 256px" disabled  placeholder="不可更改"/>
                     <el-select v-model="form.state" placeholder="状态" style="width:100px">
                         <el-option label="启用" :value="1"></el-option>
                         <el-option label="停用" :value="0"></el-option>
                     </el-select><span class="tips notnull"></span>
                 </el-form-item>
-                <el-form-item label="终端名称">
-                    <el-input v-model="form.name" style="width: 360px" placeholder="如：张三、停车场等"></el-input><span class="tips notnull"></span>
-                </el-form-item>
                 <el-form-item label="终端公钥">
-                    <el-input v-model="form.public_key" style="width:360px" placeholder="应用端验签、加密用公钥"></el-input><span class="tips notnull"></span>
+                    <el-input v-model="form.public_key" style="width:360px" :autosize="{ minRows: 5 }" type="textarea" placeholder="应用端验签、加密用公钥"></el-input><span class="tips notnull"></span>
                 </el-form-item>
                 <el-form-item label="终端私钥 ">
-                    <el-input v-model="form.private_key" style="width:360px" placeholder="终端发起API请求签名、解密私钥"></el-input><span class="tips notnull"></span>
+                    <el-input v-model="form.private_key" style="width:360px" :autosize="{ minRows: 5 }" type="textarea" placeholder="终端发起API请求签名、解密私钥"></el-input><span class="tips notnull"></span>
                 </el-form-item>
                 <el-form-item class="el-form-btns">
                     <el-button icon="check" type="primary" v-on:click="submit">保存</el-button>
@@ -80,7 +80,7 @@
         state: 1,
         public_key: '',
         private_key: '',
-        create_time: 0,
+        create_time: '',
         drawer: false
     }
     import { ref, reactive, onMounted, getCurrentInstance } from 'vue'
@@ -119,7 +119,7 @@
                 if (res.success) {
                     getlist()
                 }
-            }, { sn: row.sn })
+            }, { sn: row.sn  })
         })
     }
     function modify(row) {
@@ -132,7 +132,7 @@
                 } else {
                     wln.toast(res.message)
                 }
-            }, { sn: row.sn ,sid: row.sid })
+            }, { sn: row.sn , sid: row.sid })
         } else {
             form.drawer = true
         }

@@ -16,7 +16,7 @@ namespace Models
         /// <summary>
         /// 用户标识
         /// </summary>
-        [SugarColumn(Length = 30)]
+        [SugarColumn(Length = 50)]
         public string sid { get; set; }
         /// <summary>
         /// 授权角色 manger/operator

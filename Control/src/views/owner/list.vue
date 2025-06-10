@@ -27,6 +27,9 @@
             </template>
         </el-table-column>
         <el-table-column></el-table-column>
+        <el-table-column width="168" label="登记时间">
+            <template #default="scope">{{scope.row.time_create.showTime()}}</template>
+        </el-table-column>
         <el-table-column width="108" align="center" fixed="right">
             <template #default="scope">
                 <el-dropdown placement="bottom-end">

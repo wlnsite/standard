@@ -10,7 +10,7 @@ import { ElMessage, ElMessageBox} from 'element-plus'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 const app = createApp(App)
 const router = createRouter({ history: createWebHistory('/'), routes: [{ path: "/:pathMatch(.*)*", component: () => import("@/wlnapp/404.vue")}] })
-const cfgs = { api: (localStorage.getItem('control_service') || '') + '/control/service', debug: localStorage.getItem('debug') == 'true', pk: localStorage.getItem('pub') || '' }
+const cfgs = { api: (localStorage.getItem('service') || '') + '/control/service', debug: localStorage.getItem('debug') == 'true', pk: localStorage.getItem('pub') || '' }
 const wln = Wln(cfgs, {
     noauth: (obj) => {
         if(obj && obj.message) {

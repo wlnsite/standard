@@ -14,17 +14,20 @@
                 </div>
             </template>
         </el-table-column>
-        <el-table-column width="168" label="用户sid" fixed="left">
-            <template #default="scope">
-                <div class="fs15 lh18">{{scope.row.sid}}</div>
-            </template>
-        </el-table-column>
-        <el-table-column width="168" label="员工姓名" fixed="left">
+        <el-table-column width="128" label="姓名" fixed="left">
             <template #default="scope">
                 <div class="fs15 lh18">{{scope.row.name}}</div>
             </template>
         </el-table-column>
+        <el-table-column width="168" label="手机号" fixed="left">
+            <template #default="scope">
+                <div class="fs15 lh18">{{scope.row.mobile}}</div>
+            </template>
+        </el-table-column>
         <el-table-column></el-table-column>
+        <el-table-column width="128" label="添加时间">
+            <template #default="scope">{{scope.row.time_create.showTime()}}</template>
+        </el-table-column>
         <el-table-column width="108" align="center" fixed="right">
             <template #default="scope">
                 <el-dropdown placement="bottom-end">
@@ -39,30 +42,30 @@
             </template>
         </el-table-column>
     </el-table>
-     <!--弹出框内容-->
+    <!--弹出框内容-->
     <el-pagination v-on:current-change="getlist" layout="total, prev, pager, next, jumper" :total="pager.total" :current-page="query.page" :page-size="query.size"></el-pagination>
     <div class="wln-mask-layout" v-if="form.drawer">
-        <div class="wln-mask-form" style="width:580px;">
+        <div class="wln-mask-form" style="width:580px">
             <div class="wln-title">操作人员信息</div>
             <el-form label-width="120px">
-                <el-form-item label="用户id">
-                    <el-input v-model="form.sid" style="width: 256px" placeholder="" ></el-input>
-                    <el-select v-model="form.state" placeholder="状态" style="width:100px">
+                <el-form-item label="员工角色">
+                    <el-select v-model="form.role" placeholder="请选择授权身份" style="width: 210px">
+                        <el-option label="管理员" value="manger"></el-option>
+                        <el-option label="普通用户" value="operator"></el-option>
+                    </el-select>
+                    <el-select v-model="form.state" placeholder="状态" style="width:160px">
                         <el-option label="启用" :value="1"></el-option>
                         <el-option label="停用" :value="0"></el-option>
                     </el-select><span class="tips notnull"></span>
                 </el-form-item>
-                <el-form-item label="员工角色">
-                    <el-select v-model="form.role" placeholder="请选择员工角色身份" style="width: 360px">
-                        <el-option label="管理人员" value="manger"></el-option>
-                        <el-option label="普通人员" value="operator"></el-option>
-                    </el-select><span class="tips notnull"></span>
-                </el-form-item>
-                <el-form-item label="员工姓名">
-                    <el-input v-model="form.name" style="width:360px" placeholder=""></el-input><span class="tips notnull"></span>
-                </el-form-item>
-                <el-form-item label="手机号码 ">
-                    <el-input v-model="form.mobile" style="width:360px" placeholder=""></el-input><span class="tips notnull"></span>
+                <el-form-item label="用户账号">
+                    <el-select v-model="select.user" allow-create filterable remote placeholder="请输入登录用手机号码" v-on:change="selectUser" :remote-method="searchUser" style="width: 210px">
+                        <el-option v-for="item in options.users" :key="item.value" :label="item.value" :value="item">
+                            <span style="float:left">{{item.value}}</span>
+                            <span style=" float: right; color: var(--el-text-color-secondary); font-size: 13px;">{{item.label}}</span>
+                        </el-option>
+                    </el-select>
+                    <el-input v-model="form.name" placeholder="姓名" style="width: 160px"></el-input><span class="tips notnull"></span>
                 </el-form-item>
                 <el-form-item class="el-form-btns">
                     <el-button icon="check" type="primary" v-on:click="submit">保存</el-button>
@@ -76,29 +79,31 @@
 <script setup>
     let mForm = {
         sid	: '',
-        name: '',
         role: '',
         state: 1,
-        value: '',
-        label: '',
-        mobile: '',
         owner: '',
-        create_time: '',
-        time_create: '',
+        mobile: '',
+        name: '',
         drawer: false
     }
+    import { useRoute } from 'vue-router'
     import { ref, reactive, onMounted, getCurrentInstance } from 'vue'
     import { mQuery, mPager } from "@/wlnapp/model.js"
     const { ctx, proxy: { wln } } = getCurrentInstance()
     const form = reactive({ ...mForm })
     const pager = reactive({ ...mPager })
-    const query = reactive({ ...mQuery })
-    function refresh() {
+    const query = reactive({ ...mQuery, owner: '' })
+    const select = reactive({ user: '' })
+    const options = reactive({
+        users: []
+    })
+
+    const refresh = () => {
         pager.rows = []
         pager.message = pager.loadMsg
         getlist(0)
     }
-    function getlist(page) {
+    const getlist = (page) => {
         form.drawer = false
         query.page = parseInt(page) || 0
         pager.message = pager.loadMsg
@@ -108,25 +113,28 @@
             pager.message = res.success ? res.data.message : res.message
         }, query, true, true, (res) => { pager.message = pager.errMsg })
     }
-    function submit() {
+    const submit = () => {
+        form.owner = query.owner
         wln.api('/operator/submit', (res) => {
             wln.toast(res.message, res.success ? 'success' : 'error')
             if (res.success) {
                 getlist()
             }
-        }, form )
+        }, form)
     }
-    function remove(row) {
+    const remove = (row) => {
         wln.confirm('数据一经删除将无法恢复，是否继续？', () => {
             wln.api('/operator/remove', (res) => {
                 wln.toast(res.message, res.success)
                 if (res.success) {
                     getlist()
                 }
-            }, { sid: row.sid , owner: row.owner})
+            }, { sid: row.sid })
         })
     }
-    function modify(row) {
+
+    const modify = (row) => {
+        select.user = ''
         for (let i in mForm) { form[i] = mForm[i] }
         if (row) {
             wln.api('/operator/modify', (res) => {
@@ -136,12 +144,39 @@
                 } else {
                     wln.toast(res.message)
                 }
-            }, {  sid: row.sid , owner: row.owner })
+            }, { sid: row.sid })
         } else {
             form.drawer = true
         }
     }
+    
+    const selectUser = (o) => {
+        if(typeof(o) == 'string') {
+            form.mobile = o || ''
+            form.name = ''
+        } else {
+            form.mobile = o.value || ''
+            form.name = o.label || ''
+        }
+    }
+
+    const searchUser = (query) => {
+        if (query) {            
+            wln.api('/user/list', (res) => {
+                if (res.success) {
+                    options.users = res.data.map(item => {
+                        return { value: item.mobile, label: item.name }
+                    })
+                }
+            }, {key: query})
+        } else {
+            options.users = []
+        }
+    }
+
     onMounted(() => {
+        let args = useRoute().query
+        query.owner = args.owner
         refresh()
     })
 </script>
