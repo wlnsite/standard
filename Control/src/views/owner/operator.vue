@@ -14,7 +14,7 @@
                 </div>
             </template>
         </el-table-column>
-        <el-table-column width="128" label="姓名" fixed="left">
+        <el-table-column width="128" label="姓名" fixed="left">zz
             <template #default="scope">
                 <div class="fs15 lh18">{{scope.row.name}}</div>
             </template>
@@ -49,23 +49,23 @@
             <div class="wln-title">操作人员信息</div>
             <el-form label-width="120px">
                 <el-form-item label="员工角色">
-                    <el-select v-model="form.role" placeholder="请选择授权身份" style="width: 210px">
+                    <el-select v-model="form.role" placeholder="请选择授权身份" style="width: 240px">
                         <el-option label="管理员" value="manger"></el-option>
                         <el-option label="普通用户" value="operator"></el-option>
                     </el-select>
-                    <el-select v-model="form.state" placeholder="状态" style="width:160px">
+                    <el-select v-model="form.state" placeholder="状态" style="width:130px">
                         <el-option label="启用" :value="1"></el-option>
                         <el-option label="停用" :value="0"></el-option>
                     </el-select><span class="tips notnull"></span>
                 </el-form-item>
                 <el-form-item label="用户账号">
-                    <el-select v-model="select.user" allow-create filterable remote placeholder="请输入登录用手机号码" v-on:change="selectUser" :remote-method="searchUser" style="width: 210px">
+                    <el-select v-model="select.user" allow-create filterable remote placeholder="请输入登录用手机号码" v-on:change="selectUser" :remote-method="searchUser" style="width: 240px">
                         <el-option v-for="item in options.users" :key="item.value" :label="item.value" :value="item">
-                            <span style="float:left">{{item.value}}</span>
-                            <span class="f13 cr1" style="float: right;">{{item.label}}</span>
+                            <span class="fl">{{item.value}}</span>
+                            <span class="fr f13 c99">{{item.label}}</span>
                         </el-option>
                     </el-select>
-                    <el-input v-model="form.name" placeholder="姓名" style="width: 160px"></el-input><span class="tips notnull"></span>
+                    <el-input v-model="form.name" placeholder="姓名" style="width: 130px"></el-input><span class="tips notnull"></span>
                 </el-form-item>
                 <el-form-item class="el-form-btns">
                     <el-button icon="check" type="primary" v-on:click="submit">保存</el-button>
@@ -129,8 +129,9 @@
                 if (res.success) {
                     getlist()
                 }
-            }, { sid: row.sid })
+            }, { sid: row.sid ,owner:row.owner , mobile:row.mobile})
         })
+        
     }
 
     const modify = (row) => {
@@ -144,7 +145,7 @@
                 } else {
                     wln.toast(res.message)
                 }
-            }, { sid: row.sid })
+            }, { sid: row.sid , owner:row.owner , mobile:row.mobile})
         } else {
             form.drawer = true
         }

@@ -43,7 +43,7 @@ export default defineConfig({
         port: 7800,
         cors: false,
         proxy: {
-            "/control/service": { target: "http://192.168.31.230:9800", changeOrigin: true, ws: false }
+            "/control/service": { target: "http://192.168.30.2:7800", changeOrigin: true, ws: false }
         }
     },
 })
