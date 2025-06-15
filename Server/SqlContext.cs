@@ -69,7 +69,7 @@ public class SqlContext : SqlSugarClient
                     {
                         var rows = new List<Models.Owner>();
                         rows.Add(new Models.Owner { id = 270100001, role = "buyer", name = "发货测试单位", time_create = now });
-                        rows.Add(new Models.Owner { id = 270100002, role = "buyer", name = "承运测试单位", time_create = now });
+                        rows.Add(new Models.Owner { id = 270100002, role = "supplier", name = "承运测试单位", time_create = now });
                         db.Storageable<Models.Owner>(rows).ExecuteCommand();
                     }
                     if (!db.Queryable<Models.User>().Any())

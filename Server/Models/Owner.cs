@@ -15,7 +15,7 @@ namespace Models
         [SugarColumn(IsPrimaryKey = true)]
         public int id { get; set; }
         /// <summary>
-        /// 默认角色
+        /// 默认角色 buyer/supplier
         /// </summary>
         [SugarColumn(Length = 10)]
         public string role { get; set; }

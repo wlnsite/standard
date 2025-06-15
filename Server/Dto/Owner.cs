@@ -13,7 +13,7 @@ namespace Dto
         /// </summary>
         public int id { get; set; }
         /// <summary>
-        /// 默认角色
+        /// 默认角色 buyer/supplier
         /// </summary>
         public string role { get; set; }
         /// <summary>

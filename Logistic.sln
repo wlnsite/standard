@@ -26,6 +26,8 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Control", "Control\", "{812
 		SlnRelativePath = "Control\"
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toolkit", "Toolkit\Toolkit.csproj", "{42732D92-6521-4E94-87C1-277DDFE43B31}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +42,10 @@ Global
 		{812D786E-466C-36B3-E1E5-34E676A04EFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{812D786E-466C-36B3-E1E5-34E676A04EFF}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{812D786E-466C-36B3-E1E5-34E676A04EFF}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{42732D92-6521-4E94-87C1-277DDFE43B31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42732D92-6521-4E94-87C1-277DDFE43B31}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42732D92-6521-4E94-87C1-277DDFE43B31}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42732D92-6521-4E94-87C1-277DDFE43B31}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
