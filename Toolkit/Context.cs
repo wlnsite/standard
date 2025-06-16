@@ -11,7 +11,7 @@ namespace Logistic
     public class Context
     {
         #region 基础方法开始
-        internal String LogisticHost = Wlniao.Config.GetSetting("LogisticHost", "https://lmsapi.wlniao.net");
+        internal String LogisticHost { get; set; } = string.Empty;
         internal String LogisticCertSn { get; set; } = string.Empty;
         private byte[] LogisticServerPub { get; set; } = [];
         private byte[] LogisticPublicKey { get; set; } = [];
@@ -24,10 +24,11 @@ namespace Logistic
         {
             try
             {
-                this.LogisticCertSn = Wlniao.Config.GetSetting("LogisticCertSn");
-                this.LogisticServerPub = Wlniao.Crypto.Helper.Decode(Wlniao.Config.GetSetting("LogisticServerPub"));
-                this.LogisticPublicKey = Wlniao.Crypto.Helper.Decode(Wlniao.Config.GetSetting("LogisticPublicKey"));
-                this.LogisticPrivateKey = Wlniao.Crypto.Helper.Decode(Wlniao.Config.GetSetting("LogisticPrivateKey"));
+                this.LogisticHost = Settings.LogisticHost;
+                this.LogisticCertSn = Settings.LogisticCertSn;
+                this.LogisticServerPub = Wlniao.Crypto.Helper.Decode(Settings.LogisticServerPub);
+                this.LogisticPublicKey = Wlniao.Crypto.Helper.Decode(Settings.LogisticPublicKey);
+                this.LogisticPrivateKey = Wlniao.Crypto.Helper.Decode(Settings.LogisticPrivateKey);
             }
             catch { }
         }
@@ -44,6 +45,7 @@ namespace Logistic
         {
             try
             {
+                this.LogisticHost = Settings.LogisticHost;
                 this.LogisticCertSn = certSn;
                 this.LogisticServerPub = Wlniao.Crypto.Helper.Decode(serverPub);
                 this.LogisticPublicKey = Wlniao.Crypto.Helper.Decode(certPublicKey);
@@ -99,13 +101,12 @@ namespace Logistic
             }
             else
             {
-                var token = strUtil.CreateRndStrE(16);
+                var token = string.IsNullOrEmpty(Settings.LogisticToken) ? strUtil.CreateRndStrE(16) : Settings.LogisticToken;
                 var utime = DateTools.GetUnix();
                 var plain = Newtonsoft.Json.JsonConvert.SerializeObject(data);
                 var sm4data = Wlniao.Encryptor.SM4EncryptECBToHex(plain, token);
-                var sm4key = Wlniao.Encryptor.SM2EncryptByPublicKey(UTF8Encoding.UTF8.GetBytes(token), LogisticServerPub);
                 var sm2key = new Wlniao.Crypto.SM2(new byte[0], LogisticPrivateKey, Wlniao.Crypto.SM2Mode.C1C3C2);
-                var signtxt = Wlniao.Crypto.Helper.Encode(sm2key.Sign(UTF8Encoding.UTF8.GetBytes($"{utime}:{LogisticCertSn}:{sm4data}")));
+                var signtxt = Wlniao.Crypto.Helper.Encode(sm2key.Sign(UTF8Encoding.UTF8.GetBytes($"{utime}\n{path}\n{LogisticCertSn}\n{sm4data}")));
                 if (string.IsNullOrEmpty(msgid))
                 {
                     msgid = strUtil.CreateLongId();
@@ -116,7 +117,17 @@ namespace Logistic
                 var apiServer = LogisticHost + path;
                 try
                 {
-                    var reqStr = Newtonsoft.Json.JsonConvert.SerializeObject(new { sn = LogisticCertSn, time = utime, data = sm4data, sign = signtxt, sm4key });
+                    var body = new Dictionary<string, object> {
+                        {"sn", LogisticCertSn },
+                        {"time", utime },
+                        {"data", sm4data },
+                        {"sign", signtxt }
+                    };
+                    if (token != Settings.LogisticToken)
+                    {
+                        body.TryAdd("sm4key", Wlniao.Encryptor.SM2EncryptByPublicKey(UTF8Encoding.UTF8.GetBytes(token), LogisticServerPub));
+                    }
+                    var reqStr = Newtonsoft.Json.JsonConvert.SerializeObject(body);
                     using (var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(reqStr)))
                     {
                         var handler = new HttpClientHandler { ServerCertificateCustomValidationCallback = XCore.ServerCertificateCustomValidationCallback };

@@ -10,7 +10,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="Wlniao.XCore" Version="8.0.43" />
+		<PackageReference Include="Wlniao.AspNetCore" Version="8.0.48" />
 	</ItemGroup>
 
 </Project>
