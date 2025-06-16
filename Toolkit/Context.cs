@@ -11,7 +11,7 @@ namespace Logistic
     public class Context
     {
         #region 基础方法开始
-        internal String LogisticHost = Wlniao.Config.GetSetting("LogisticHost", "https://logistic.wlniao.net");
+        internal String LogisticHost = Wlniao.Config.GetSetting("LogisticHost", "https://lmsapi.wlniao.net");
         internal String LogisticCertSn { get; set; } = string.Empty;
         private byte[] LogisticServerPub { get; set; } = [];
         private byte[] LogisticPublicKey { get; set; } = [];
@@ -89,9 +89,9 @@ namespace Logistic
             {
                 rlt.message = "配置异常，参数“LogisticCertSn”未配置";
             }
-            else if (LogisticPublicKey == null || LogisticPublicKey.Length < 20)
+            else if (LogisticServerPub == null || LogisticServerPub.Length < 20)
             {
-                rlt.message = "配置异常，参数“LogisticPublicKey”未配置";
+                rlt.message = "配置异常，参数“LogisticServerPub”未配置";
             }
             else if (LogisticPrivateKey == null || LogisticPrivateKey.Length < 20)
             {
@@ -104,8 +104,8 @@ namespace Logistic
                 var plain = Newtonsoft.Json.JsonConvert.SerializeObject(data);
                 var sm4data = Wlniao.Encryptor.SM4EncryptECBToHex(plain, token);
                 var sm4key = Wlniao.Encryptor.SM2EncryptByPublicKey(UTF8Encoding.UTF8.GetBytes(token), LogisticServerPub);
-                var sm2key = new Wlniao.Crypto.SM2(LogisticPublicKey, LogisticPrivateKey, Wlniao.Crypto.SM2Mode.C1C3C2);
-                var signtxt = Wlniao.Crypto.Helper.Encode(sm2key.SignWithRsAsn1(UTF8Encoding.UTF8.GetBytes($"{utime}:{LogisticCertSn}:{sm4data}")));
+                var sm2key = new Wlniao.Crypto.SM2(new byte[0], LogisticPrivateKey, Wlniao.Crypto.SM2Mode.C1C3C2);
+                var signtxt = Wlniao.Crypto.Helper.Encode(sm2key.Sign(UTF8Encoding.UTF8.GetBytes($"{utime}:{LogisticCertSn}:{sm4data}")));
                 if (string.IsNullOrEmpty(msgid))
                 {
                     msgid = strUtil.CreateLongId();
@@ -240,15 +240,15 @@ namespace Logistic
         #endregion 基础方法结束
 
 
-        public ApiResult<Dictionary<string, object>> RoutePush(string contract, long time, string state, string biz_no, string out_biz_no, string phone, string content, string geocoord)
+        public ApiResult<Dictionary<string, object>> RoutePush(string contract, long time, string state, string bill_no, string out_bill_no, string phone, string content, string geocoord)
         {
-            var result = RequestApi<Dictionary<string, object>>("/v1/s2b_route_push", new Dictionary<string, object>
+            var result = RequestApi<Dictionary<string, object>>("/v1/bill_route_push", new Dictionary<string, object>
             {
                 { "contract", contract },
                 { "time", time },
                 { "state", state },
-                { "biz_no", biz_no },
-                { "out_biz_no", out_biz_no },
+                { "bill_no", bill_no },
+                { "out_bill_no", out_bill_no },
                 { "phone", phone },
                 { "content", content },
                 { "geocoord", geocoord }
