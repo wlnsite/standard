@@ -6,6 +6,18 @@
 		<Nullable>enable</Nullable>
 		<NoWarn>CS8601</NoWarn>
 		<RootNamespace>Logistic</RootNamespace>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<PackageOutputPath>E:\Package</PackageOutputPath>
+		<Version>0.1.0</Version>
+		<PackageId>Logistic.Toolkit</PackageId>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <DebugType>none</DebugType>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <DebugType>none</DebugType>
 	</PropertyGroup>
 
 	<ItemGroup>
