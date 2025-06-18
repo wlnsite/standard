@@ -1,5 +1,7 @@
-﻿using System.Text;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Text;
 using Wlniao;
 using Wlniao.Crypto;
 
@@ -17,56 +19,20 @@ namespace Logistic
         /// <param name="func"></param>
         /// <returns></returns>
         [NonAction]
-        public IActionResult? Check(Func<String, Dictionary<String, Object>, IActionResult> func)
+        public IActionResult? Invoke(Func<String, Dictionary<String, Object>, ApiResult<object>> func)
         {
-            try
+            result = Context.Invoke(new Dictionary<string, object>
             {
-                var time = cvt.ToLong(PostRequest("time"));
-                var owner = PostRequest("owner");
-                var action = PostRequest("action");
-                var data = PostRequest("data");
-                var sign = PostRequest("sign");
-                if (string.IsNullOrEmpty(owner))
-                {
-                    return OutMessage("缺少参数“owner”，请输入接收机构", "113");
-                }
-                if (string.IsNullOrEmpty(action))
-                {
-                    return OutMessage("缺少参数“action”，请输入调用的操作名称", "113");
-                }
-                if (time < DateTools.GetUnix() - 7200)
-                {
-                    return OutMessage(time > 0 ? "请求已过有效期，请重新发起" : "缺少参数“time”，请指定请求时间", "113");
-                }
-                if (string.IsNullOrEmpty(data))
-                {
-                    return OutMessage("缺少参数“data”，请输入请求数据", "113");
-                }
-                if (string.IsNullOrEmpty(sign))
-                {
-                    return OutMessage("缺少参数“sign”，请对当前请求进行签名", "113");
-                }
-                if (!new Wlniao.Crypto.SM2(Settings.LogisticServerPub, String.Empty, KeyType.Generate, Wlniao.Crypto.SM2Mode.C1C3C2).VerifySign(UTF8Encoding.UTF8.GetBytes($"{time}\n{owner}\n{action}\n{data}"), Wlniao.Crypto.Helper.Decode(sign)))
-                {
-                    return OutMessage("参数“sign”无效，当前请求签名验证失败", "113");
-                }
-                var plainData = Encryptor.SM4DecryptECBFromHex(data, Settings.LogisticToken);
-                if (string.IsNullOrEmpty(plainData))
-                {
-                    return OutMessage("数据解密失败，请重新发起", "403");
-                }
-                else
-                {
-                    var input = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, object>>(plainData);
-                    return func?.Invoke(action, input ?? new Dictionary<string, object>());
-                }
-            }
-            catch (Exception ex)
-            {
-                Wlniao.Log.Loger.Error(ex.Message);
-                return OutMessage(ex.Message, "401");
-            }
+                { "time", cvt.ToLong(PostRequest("time")) },
+                { "owner", PostRequest("owner") },
+                { "action", PostRequest("action") },
+                { "data", PostRequest("data") },
+                { "sign", PostRequest("sign") },
+                { "wid", GetRequest("wid") }
+            }, func);
+            return OutDefault();
         }
+
         /// <summary>
         /// 
         /// </summary>

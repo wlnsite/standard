@@ -1,10 +1,14 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using Org.BouncyCastle.Ocsp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Wlniao;
+using Wlniao.Crypto;
 using Wlniao.Log;
+using Wlniao.OpenApi;
 
 namespace Logistic
 {
@@ -73,6 +77,81 @@ namespace Logistic
             {
                 instance = value;
             }
+        }
+
+        /// <summary>
+        /// 校验请求内容，并取出调用方法并解密业务数据
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        public static ApiResult<object> Invoke(Dictionary<string, object> msg, Func<String, Dictionary<String, Object>, ApiResult<Object>> func)
+        {
+            var time = msg.GetInt64("time");
+            var owner = msg.GetString("owner");
+            var msgid = msg.GetString("msgid");
+            var action = msg.GetString("action");
+            var data = msg.GetString("data");
+            var sign = msg.GetString("sign");
+            var result = new ApiResult<object> { node = XCore.WebNode, message = "未知错误" };
+            try
+            {
+                if (string.IsNullOrEmpty(owner))
+                {
+                    result.code = "501";
+                    result.message = "缺少参数“owner”，请输入接收机构";
+                }
+                else if (string.IsNullOrEmpty(action))
+                {
+                    result.code = "501";
+                    result.message = "缺少参数“action”，请输入调用的操作名称";
+                }
+                else if (time < DateTools.GetUnix() - 7200)
+                {
+                    result.code = "113";
+                    result.message = time > 0 ? "请求已过有效期，请重新发起" : "缺少参数“time”，请指定请求时间";
+                }
+                else if (string.IsNullOrEmpty(data))
+                {
+                    result.code = "501";
+                    result.message = "缺少参数“data”，请输入请求数据";
+                }
+                else if (string.IsNullOrEmpty(sign))
+                {
+                    result.code = "115";
+                    result.message = "缺少参数“sign”，请对当前请求进行签名";
+                }
+                else if (!new Wlniao.Crypto.SM2(Settings.LogisticServerPub, String.Empty, KeyType.Generate, Wlniao.Crypto.SM2Mode.C1C3C2).VerifySign(UTF8Encoding.UTF8.GetBytes($"{time}\n{owner}\n{action}\n{data}"), Wlniao.Crypto.Helper.Decode(sign)))
+                {
+                    result.code = "115";
+                    result.message = "参数“sign”无效，当前请求签名验证失败";
+                }
+                else
+                {
+                    var plainData = Encryptor.SM4DecryptECBFromHex(data, Settings.LogisticToken);
+                    if (string.IsNullOrEmpty(plainData))
+                    {
+                        result.code = "403";
+                        result.message = "数据解密失败，请重新发起";
+                    }
+                    else
+                    {
+                        var req = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, object>>(plainData);
+                        var res = func.Invoke(action, req ?? new Dictionary<string, object>());
+                        var logReq = Newtonsoft.Json.JsonConvert.SerializeObject(new { time, owner, action, data = req ?? new Dictionary<string, object>() });
+                        var logRes = Newtonsoft.Json.JsonConvert.SerializeObject(new { res.success, res.message, res.code, data = res.data ?? new { } });
+                        result = new ApiResult<object> { success = res.success, message = res.message, code = res.code, data = Encryptor.SM4EncryptECBToHex(Newtonsoft.Json.JsonConvert.SerializeObject(res.data ?? new { }), Settings.LogisticToken) };
+                        Loger.Topic("agent", $"msgid:{msgid}{Environment.NewLine} >>> {logReq}{Environment.NewLine} <<< {logRes}", Wlniao.Log.LogLevel.Debug, true);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                result.code = "500";
+                result.message = ex.Message;
+                Wlniao.Log.Loger.Error(ex.Message);
+            }
+            return result;
         }
 
         /// <summary>
@@ -267,5 +346,7 @@ namespace Logistic
 
             return result;
         }
+    
+    
     }
 }
