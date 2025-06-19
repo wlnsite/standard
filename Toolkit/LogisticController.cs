@@ -55,7 +55,8 @@ namespace Logistic
                 txt = Newtonsoft.Json.JsonConvert.SerializeObject(result.data);
             }
             dic.Add("code", string.IsNullOrEmpty(result.code) ? "" : result.code);
-            dic.Add("data", Encryptor.SM4EncryptECBToHex(txt, Settings.LogisticToken));
+            //dic.Add("data", Encryptor.SM4EncryptECBToHex(txt, Settings.LogisticToken));
+            dic.Add("data", result.data);
             dic.Add("success", result.success);
             dic.Add("message", result.message);
             if (result.tips)
