@@ -140,7 +140,7 @@ namespace Logistic
                         var res = func.Invoke(action, req ?? new Dictionary<string, object>());
                         var logReq = Newtonsoft.Json.JsonConvert.SerializeObject(new { time, owner, action, data = req ?? new Dictionary<string, object>() });
                         var logRes = Newtonsoft.Json.JsonConvert.SerializeObject(new { res.success, res.message, res.code, data = res.data ?? new { } });
-                        result = new ApiResult<object> { success = res.success, message = res.message, code = res.code, data = Encryptor.SM4EncryptECBToHex(Newtonsoft.Json.JsonConvert.SerializeObject(res.data ?? new { }), Settings.LogisticToken) };
+                        result = new ApiResult<object> { success = res.success, message = res.message, tips = res.tips, code = res.code, data = Encryptor.SM4EncryptECBToHex(Newtonsoft.Json.JsonConvert.SerializeObject(res.data ?? new { }), Settings.LogisticToken) };
                         Loger.Topic("agent", $"msgid:{msgid}{Environment.NewLine} >>> {logReq}{Environment.NewLine} <<< {logRes}", Wlniao.Log.LogLevel.Debug, true);
                     }
                 }
@@ -165,7 +165,11 @@ namespace Logistic
         /// <returns></returns>
         public Wlniao.ApiResult<T> RequestApi<T>(String path, Object data, String? msgid = null, Boolean storeLog = true)
         {
-            var rlt = new Wlniao.ApiResult<T>();
+            if (string.IsNullOrEmpty(msgid))
+            {
+                msgid = strUtil.CreateLongId();
+            }
+            var rlt = new Wlniao.ApiResult<T> { traceid = msgid };
             if (string.IsNullOrEmpty(LogisticCertSn))
             {
                 rlt.message = "配置异常，参数“LogisticCertSn”未配置";
@@ -186,10 +190,6 @@ namespace Logistic
                 var sm4data = Wlniao.Encryptor.SM4EncryptECBToHex(plain, token);
                 var sm2key = new Wlniao.Crypto.SM2(new byte[0], LogisticPrivateKey, Wlniao.Crypto.SM2Mode.C1C3C2);
                 var signtxt = Wlniao.Crypto.Helper.Encode(sm2key.Sign(UTF8Encoding.UTF8.GetBytes($"{utime}\n{path}\n{LogisticCertSn}\n{sm4data}")));
-                if (string.IsNullOrEmpty(msgid))
-                {
-                    msgid = strUtil.CreateLongId();
-                }
                 var start = DateTime.Now;
                 var resStr = "";
                 var useTime = "";
@@ -250,7 +250,7 @@ namespace Logistic
                         Loger.Topic("logistic", $"msgid:{msgid},{apiServer}{Environment.NewLine}请确认接口访问是否正常： => {ex.Message}", Wlniao.Log.LogLevel.Error, true);
                     }
                 }
-                var logDebug = $"msgid:{msgid},{apiServer}[usetime:{useTime}]{Environment.NewLine} >>> {plain}";
+                var logDebug = $"traceid:{rlt.traceid},{apiServer}[usetime:{useTime}]{Environment.NewLine} >>> {plain}";
                 try
                 {
                     var resObj = Newtonsoft.Json.JsonConvert.DeserializeObject<Wlniao.ApiResult<String>>(resStr);
@@ -271,7 +271,6 @@ namespace Logistic
                             }
                             else
                             {
-                                logDebug += "\n <<< " + json;
                                 try
                                 {
                                     if (typeof(T) == typeof(string))
@@ -284,6 +283,7 @@ namespace Logistic
                                     }
                                 }
                                 catch { }
+                                logDebug += "\n <<< " + Newtonsoft.Json.JsonConvert.SerializeObject(new { rlt.success, rlt.message, rlt.code, rlt.data });
                             }
                         }
                         else

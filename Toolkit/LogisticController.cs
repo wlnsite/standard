@@ -58,6 +58,10 @@ namespace Logistic
             dic.Add("data", Encryptor.SM4EncryptECBToHex(txt, Settings.LogisticToken));
             dic.Add("success", result.success);
             dic.Add("message", result.message);
+            if (result.tips)
+            {
+                dic.Add("tips", result.tips);
+            }
             return Json(dic);
         }
 
