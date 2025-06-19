@@ -141,7 +141,7 @@ namespace Logistic
                         var logReq = Newtonsoft.Json.JsonConvert.SerializeObject(new { time, owner, action, data = req ?? new Dictionary<string, object>() });
                         var logRes = Newtonsoft.Json.JsonConvert.SerializeObject(new { res.success, res.message, res.code, data = res.data ?? new { } });
                         result = new ApiResult<object> { success = res.success, message = res.message, tips = res.tips, code = res.code, data = Wlniao.Encryptor.SM4EncryptECBToHex(Newtonsoft.Json.JsonConvert.SerializeObject(res.data ?? new { }), Logistic.Settings.LogisticToken) };
-                        Loger.Topic("agent", $"msgid:{msgid}{Environment.NewLine} >>> {logReq}{Environment.NewLine} <<< {logRes}", Wlniao.Log.LogLevel.Debug, true);
+                        Loger.Topic("debug", $"msgid:{msgid}{Environment.NewLine} >>> {logReq}{Environment.NewLine} <<< {logRes}", Wlniao.Log.LogLevel.Debug, true);
                     }
                 }
             }
