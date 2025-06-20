@@ -322,7 +322,7 @@ namespace Logistic
                 }
                 if (storeLog)
                 {
-                    Loger.Topic("logistic", logDebug, Wlniao.Log.LogLevel.Debug, true);
+                    Loger.Topic("debug", logDebug, Wlniao.Log.LogLevel.Debug, true);
                 }
             }
             return rlt;

@@ -8,7 +8,7 @@
 		<RootNamespace>Logistic</RootNamespace>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageOutputPath>E:\Package</PackageOutputPath>
-		<Version>0.1.1</Version>
+		<Version>0.1.2</Version>
 		<PackageId>Logistic.Toolkit</PackageId>
 	</PropertyGroup>
 
